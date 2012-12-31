@@ -90,15 +90,17 @@
 ;;;###autoload
 (defun helm-perldoc:setup ()
   (interactive)
-  (let ((perl-paths (helm-perldoc:collect-perl-paths)))
-    (setq helm-perldoc:modules
-          (loop for path in perl-paths
-                append (helm-perldoc:collect-modules path path)))))
+  (unless helm-perldoc:modules
+    (setq helm-perldoc:searched-path (make-hash-table :test #'equal))
+    (let ((perl-paths (helm-perldoc:collect-perl-paths)))
+      (setq helm-perldoc:modules
+            (loop for path in perl-paths
+                  append (helm-perldoc:collect-modules path path))))))
 
-(defvar helm-perldoc:buffer (get-buffer-create "*perldoc*"))
+(defvar helm-perldoc:buffer "*perldoc*")
 
 (defun helm-perldoc:exec (cmd &optional mode-func)
-  (with-current-buffer helm-perldoc:buffer
+  (with-current-buffer (get-buffer-create helm-perldoc:buffer)
     (setq buffer-read-only nil)
     (erase-buffer)
     (let ((ret (call-process-shell-command cmd nil t)))
@@ -108,7 +110,7 @@
       (when mode-func
         (funcall mode-func))
       (setq buffer-read-only t)
-      (pop-to-buffer helm-perldoc:buffer))))
+      (pop-to-buffer (current-buffer)))))
 
 (defun helm-perldoc:action-view-document (candidate)
   (helm-perldoc:exec (format "perldoc %s" candidate)))
