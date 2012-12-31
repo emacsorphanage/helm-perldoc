@@ -39,6 +39,9 @@
   :type 'list
   :group 'helm-perldoc)
 
+(defvar helm-perldoc:modules nil
+  "List of all installed modules")
+
 (defun helm-perldoc:collect-perl-paths ()
   (with-temp-buffer
     (let ((paths nil)
@@ -84,8 +87,6 @@
                      (setq modules (append mods modules))))))
           finally
           return (remove-duplicates modules :test #'string=))))
-
-(defun helm-perldoc:modules nil)
 
 ;;;###autoload
 (defun helm-perldoc:setup ()
