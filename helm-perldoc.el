@@ -91,7 +91,7 @@
 ;;;###autoload
 (defun helm-perldoc:setup ()
   (interactive)
-  (unless helm-perldoc:modules
+  (when (or current-prefix-arg (null helm-perldoc:modules))
     (setq helm-perldoc:searched-path (make-hash-table :test #'equal))
     (let ((perl-paths (helm-perldoc:collect-perl-paths)))
       (setq helm-perldoc:modules
