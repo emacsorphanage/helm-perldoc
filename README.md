@@ -32,5 +32,13 @@ Input search word
 ## Setup
 
 ```` elisp
+;; helm-perldoc:setup takes long time on low power platform
 (add-hook 'cperl-mode-hook 'helm-perldoc:setup)
+````
+
+or
+
+```` elisp
+;; use async
+(run-at-time 0 nil 'helm-perldoc:setup)
 ````
