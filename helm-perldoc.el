@@ -52,7 +52,7 @@
       (while (not (eobp))
         (let ((path (buffer-substring-no-properties
                      (point) (line-end-position))))
-          (unless (string-match "^\\.$" path)
+          (unless (or (string-match "^\\.$" path) (not (file-directory-p path)))
             (push (file-name-as-directory path) paths)))
         (forward-line))
       (reverse (sort paths #'string<)))))
