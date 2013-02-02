@@ -1,6 +1,6 @@
 ;;; helm-perldoc.el --- perldoc with helm interface
 
-;; Copyright (C) 2012 by Syohei YOSHIDA
+;; Copyright (C) 2013 by Syohei YOSHIDA
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-helm-perldoc
@@ -242,12 +242,12 @@
   (helm :sources '(helm-perldoc:imported-source helm-perldoc:other-source)
         :buffer (get-buffer-create "*helm-perldoc*")))
 
+(provide 'helm-perldoc)
+
 ;; Local Variables:
 ;; byte-compile-warnings: (not cl-functions)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:
-
-(provide 'helm-perldoc)
 
 ;;; helm-perldoc.el ends here
