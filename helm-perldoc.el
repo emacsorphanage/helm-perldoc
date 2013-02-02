@@ -24,8 +24,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl)
 
 (require 'helm)
 
@@ -101,8 +100,17 @@
 
 (defvar helm-perldoc:buffer "*perldoc*")
 
+(defface helm-perldoc:header-module-name
+  '((((background dark))
+     :foreground "white" :weight bold)
+    (((background light))
+     :foreground "black" :weight bold))
+  "Module name in header"
+  :group 'helm-perldoc)
+
 (defun helm-perldoc:exec (cmd &optional mode-func)
   (with-current-buffer (get-buffer-create helm-perldoc:buffer)
+    (fundamental-mode) ;; clear old mode
     (setq buffer-read-only nil)
     (erase-buffer)
     (let ((ret (call-process-shell-command cmd nil t)))
@@ -114,11 +122,22 @@
       (setq buffer-read-only t)
       (pop-to-buffer (current-buffer)))))
 
-(defun helm-perldoc:action-view-document (candidate)
-  (helm-perldoc:exec (format "perldoc %s" candidate)))
+(defun helm-perldoc:show-header-line (module type)
+  (let ((header-msg (format "\"%s\" %s"
+                            module
+                            (or (and (eq type :document) "Document")
+                                "Source Code"))))
+    (with-current-buffer (get-buffer helm-perldoc:buffer)
+      (setq header-line-format
+            (propertize header-msg 'face 'helm-perldoc:header-module-name)))))
 
-(defun helm-perldoc:action-view-source (candidate)
-  (helm-perldoc:exec (format "perldoc -m %s" candidate) #'cperl-mode))
+(defun helm-perldoc:action-view-document (module)
+  (helm-perldoc:exec (format "perldoc %s" module))
+  (helm-perldoc:show-header-line module :document))
+
+(defun helm-perldoc:action-view-source (module)
+  (helm-perldoc:exec (format "perldoc -m %s" module) #'cperl-mode)
+  (helm-perldoc:show-header-line module :source))
 
 (defun helm-perldoc:action-check-corelist (candidate)
   (unless (executable-find "corelist")
@@ -222,6 +241,12 @@
   (interactive)
   (helm :sources '(helm-perldoc:imported-source helm-perldoc:other-source)
         :buffer (get-buffer-create "*helm-perldoc*")))
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; coding: utf-8
+;; indent-tabs-mode: nil
+;; End:
 
 (provide 'helm-perldoc)
 
