@@ -201,23 +201,50 @@
      ("Check by corelist" . helm-perldoc:action-check-corelist))
     "Perldoc helm attribute"))
 
-(defun helm-perldoc:filter-imported-modules (modules)
+(defun helm-perldoc:filter-modules (modules)
   (loop for module in modules
         when (and (not (string-match "^[[:digit:]]" module))
                   (not (member module helm-perldoc:ignore-modules)))
-        collect module))
+        collect module into filtered-modules
+        finally
+        return (remove-duplicates
+                (sort filtered-modules #'string<) :test #'equal)))
+
+(defun helm-perldoc:search-endline ()
+  (with-helm-current-buffer
+    (save-excursion
+      (goto-char (point-min))
+      (re-search-forward "^__\\(?:DATA\\|END\\)__" nil t))))
+
+(defun helm-perldoc:extracted-modules (str)
+  (with-temp-buffer
+    (insert str)
+    (goto-char (point-min))
+    (loop while (re-search-forward "\\<\\([a-zA-Z0-9_:]+\\)\\>" nil t)
+          collect (match-string-no-properties 1))))
+
+(defun helm-perldoc:superclass-init ()
+  (with-helm-current-buffer
+    (save-excursion
+      (goto-char (point-min))
+      (loop with bound = (helm-perldoc:search-endline)
+            with regexp = "^\\s-*use\\s-+\\(?:parent\\|base\\)\\s-+\\(?:qw\\)?\\(.+?\\)$"
+            while (re-search-forward regexp bound t)
+            appending (helm-perldoc:extracted-modules
+                       (match-string-no-properties 1)) into supers
+            finally
+            return (helm-perldoc:filter-modules supers)))))
 
 (defun helm-perldoc:imported-init ()
   (with-helm-current-buffer
     (save-excursion
       (goto-char (point-min))
-      (loop with regexp = "^\\s-*\\(?:use\\|require\\)\\s-+\\([^ \t;]+\\)"
-            while (re-search-forward regexp nil t)
+      (loop with bound = (helm-perldoc:search-endline)
+            with regexp = "^\\s-*\\(?:use\\|require\\)\\s-+\\([^ \t;]+\\)"
+            while (re-search-forward regexp bound t)
             collect (match-string-no-properties 1) into modules
             finally
-            return
-            (let ((filterd (helm-perldoc:filter-imported-modules modules)))
-              (remove-duplicates (sort filterd #'string<) :test #'equal))))))
+            return (helm-perldoc:filter-modules modules)))))
 
 (defun helm-perldoc:other-init ()
   (unless helm-perldoc:modules
@@ -230,6 +257,12 @@
     (type . perldoc)
     (candidate-number-limit . 9999)))
 
+(defvar helm-perldoc:superclass-source
+  '((name . "SuperClass")
+    (candidates . helm-perldoc:superclass-init)
+    (type . perldoc)
+    (candidate-number-limit . 9999)))
+
 (defvar helm-perldoc:other-source
   '((name . "Other Modules")
     (candidates . helm-perldoc:other-init)
@@ -239,7 +272,9 @@
 ;;;###autoload
 (defun helm-perldoc ()
   (interactive)
-  (helm :sources '(helm-perldoc:imported-source helm-perldoc:other-source)
+  (helm :sources '(helm-perldoc:imported-source
+                   helm-perldoc:superclass-source
+                   helm-perldoc:other-source)
         :buffer (get-buffer-create "*helm-perldoc*")))
 
 (provide 'helm-perldoc)
