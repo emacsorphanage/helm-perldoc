@@ -1,6 +1,6 @@
 # helm-perldoc.el
 
-![helm-perldoc](https://github.com/syohex/emacs-helm-perldoc/raw/master/image/helm-perldoc1.png)
+![helm-perldoc](image/helm-perldoc1.png)
 
 
 ## Introduction
@@ -16,9 +16,9 @@
 
 ## Basic Usage
 
-Input search word
+#### helm-perldoc
 
-    M-x helm-perldoc
+Search module and do action.
 
 
 ## Actions
@@ -31,7 +31,7 @@ Input search word
 
 ## Setup
 
-```` elisp
+````elisp
 ;; helm-perldoc:setup takes long time on low power platform
 (add-hook 'cperl-mode-hook 'helm-perldoc:setup)
 ````
