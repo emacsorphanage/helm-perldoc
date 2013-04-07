@@ -16,9 +16,13 @@
 
 ## Basic Usage
 
-#### helm-perldoc
+#### `helm-perldoc`
 
 Search module and do action.
+
+#### `helm-perldoc:history`
+
+Search modules which is already searched
 
 
 ## Actions
@@ -31,14 +35,14 @@ Search module and do action.
 
 ## Setup
 
-````elisp
+```elisp
 ;; helm-perldoc:setup takes long time on low power platform
 (add-hook 'cperl-mode-hook 'helm-perldoc:setup)
-````
+```
 
 or
 
-```` elisp
+```elisp
 ;; use async
 (run-at-time 0 nil 'helm-perldoc:setup)
-````
+```
