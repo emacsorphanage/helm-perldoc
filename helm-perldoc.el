@@ -41,6 +41,9 @@
 (defvar helm-perldoc:modules nil
   "List of all installed modules")
 
+(defvar helm-perldoc:buffer "*perldoc*")
+(defvar helm-perldoc:module-history nil)
+
 (defun helm-perldoc:collect-perl-paths ()
   (with-temp-buffer
     (let ((paths nil)
@@ -98,8 +101,6 @@
             (loop for path in perl-paths
                   append (helm-perldoc:collect-modules path path))))))
 
-(defvar helm-perldoc:buffer "*perldoc*")
-
 (defface helm-perldoc:header-module-name
   '((((background dark))
      :foreground "white" :weight bold)
@@ -119,6 +120,7 @@
       (goto-char (point-min))
       (when mode-func
         (funcall mode-func))
+      (helm-perldoc:perldoc-mode 1)
       (setq buffer-read-only t)
       (pop-to-buffer (current-buffer)))))
 
@@ -131,11 +133,38 @@
       (setq header-line-format
             (propertize header-msg 'face 'helm-perldoc:header-module-name)))))
 
+(defvar helm-perldoc:history-source
+  '((name . "Perldoc History")
+    (candidates . helm-perldoc:module-history)
+    (volatile)
+    (type . perldoc)))
+
+;;;###autoload
+(defun helm-perldoc:history ()
+  (interactive)
+  (helm :sources '(helm-perldoc:history-source)
+        :buffer (get-buffer-create "*helm-perldoc*")))
+
+;;;###autoload
+(define-minor-mode helm-perldoc:perldoc-mode
+  "helm-perldoc mode"
+  :group   'helm-perldoc
+  :lighter "helm-perldoc"
+  (if helm-perldoc:perldoc-mode
+      (progn
+        (local-set-key (kbd "R") 'helm-perldoc:history))
+    (local-unset-key (kbd "R"))))
+
+(defsubst helm-perldoc:register-history (module)
+  (add-to-list 'helm-perldoc:module-history module nil 'string=))
+
 (defun helm-perldoc:action-view-document (module)
+  (helm-perldoc:register-history module)
   (helm-perldoc:exec (format "perldoc %s" module))
   (helm-perldoc:show-header-line module :document))
 
 (defun helm-perldoc:action-view-source (module)
+  (helm-perldoc:register-history module)
   (helm-perldoc:exec (format "perldoc -m %s" module) #'cperl-mode)
   (helm-perldoc:show-header-line module :source))
 
