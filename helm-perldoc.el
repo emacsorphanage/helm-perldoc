@@ -5,7 +5,7 @@
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-helm-perldoc
 ;; Version: 0.01
-;; Package-Requires: ((helm "1.0"))
+;; Package-Requires: ((helm "1.0") (deferred "0.3.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 (require 'cl)
 
 (require 'helm)
+(require 'deferred)
 
 (defgroup helm-perldoc nil
   "perldoc with helm interface"
@@ -42,64 +43,33 @@
   "List of all installed modules")
 
 (defvar helm-perldoc:buffer "*perldoc*")
+(defvar helm-perldoc:run-setup-task-flag nil)
 (defvar helm-perldoc:module-history nil)
 
-(defun helm-perldoc:collect-perl-paths ()
-  (with-temp-buffer
-    (let ((paths nil)
-          (ret (call-process "perl" nil t nil "-le" "print for @INC")))
-      (unless (zerop ret)
-        (error "Failed collect Perl modules"))
-      (goto-char (point-min))
-      (while (not (eobp))
-        (let ((path (buffer-substring-no-properties
-                     (point) (line-end-position))))
-          (if (and (not (string-match "^\\.$" path))
-                   (file-directory-p path))
-              (push (file-name-as-directory path) paths)))
-        (forward-line))
-      (reverse (sort paths #'string<)))))
-
-(defun helm-perldoc:transform-path (path root)
-  (replace-regexp-in-string
-   "\\.\\(?:pm\\|pod\\)$" ""
-   (replace-regexp-in-string
-    "/" "::"
-    (replace-regexp-in-string (format "^%s" root) "" path))))
-
-(defun helm-perldoc:directory-p (file dir)
-  (and (not (string-match "^\\." file))
-       (file-directory-p (file-name-as-directory (concat dir file)))))
-
-(defvar helm-perldoc:searched-path (make-hash-table :test #'equal))
-
-(defun helm-perldoc:collect-modules (dir root)
-  (when (not (gethash dir helm-perldoc:searched-path))
-    (puthash dir t helm-perldoc:searched-path)
-    (loop with modules = nil
-          for file in (directory-files dir)
-          for abspath = (concat dir file)
-          do
-          (cond ((string-match "\\.\\(pm\\|pod\\)$" file)
-                 (let ((mod (helm-perldoc:transform-path abspath root)))
-                   (push mod modules)))
-                ((helm-perldoc:directory-p file dir)
-                 (let* ((moddir (file-name-as-directory abspath))
-                        (mods (helm-perldoc:collect-modules moddir root)))
-                   (when mods
-                     (setq modules (append mods modules))))))
-          finally
-          return (remove-duplicates modules :test #'string=))))
+(defun helm-perldoc:collect-installed-modules ()
+  (setq helm-perldoc:run-setup-task-flag t)
+  (deferred:$
+    (deferred:process-buffer
+      "perl" "-MExtUtils::Installed" "-le" "print for ExtUtils::Installed->new->modules")
+    (deferred:nextc it
+      (lambda (buf)
+        (with-current-buffer buf
+          (goto-char (point-min))
+          (setq helm-perldoc:modules
+                (loop with modules = nil
+                      while (not (eobp))
+                      collect
+                      (prog1
+                          (buffer-substring-no-properties
+                           (line-beginning-position) (line-end-position))
+                        (forward-line 1))))
+          (kill-buffer (current-buffer)))))))
 
 ;;;###autoload
 (defun helm-perldoc:setup ()
   (interactive)
   (when (or current-prefix-arg (null helm-perldoc:modules))
-    (setq helm-perldoc:searched-path (make-hash-table :test #'equal))
-    (let ((perl-paths (helm-perldoc:collect-perl-paths)))
-      (setq helm-perldoc:modules
-            (loop for path in perl-paths
-                  append (helm-perldoc:collect-modules path path))))))
+    (helm-perldoc:collect-installed-modules)))
 
 (defface helm-perldoc:header-module-name
   '((((background dark))
@@ -277,8 +247,10 @@
 
 (defun helm-perldoc:other-init ()
   (unless helm-perldoc:modules
-    (error "Please exec 'M-x helm-perldoc:setup'"))
-  (sort (copy-list helm-perldoc:modules) #'string<))
+    (if helm-perldoc:run-setup-task-flag
+        (error "Please wait. Setup asynchronous task does not complete yet")
+      (error "Please exec 'M-x helm-perldoc:setup'")))
+  (sort (copy-list helm-perldoc:modules) 'string<))
 
 (defvar helm-perldoc:imported-source
   '((name . "Imported Modules")
