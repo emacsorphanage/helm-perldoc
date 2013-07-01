@@ -153,7 +153,7 @@
 
 (defun helm-perldoc:search-package-statement ()
   (save-excursion
-    (when (re-search-backward "^package^\\s+*" nil t)
+    (when (re-search-backward "^package^\\s-+*" nil t)
       (let ((column (helm-perldoc:point-to-column (match-beginning 0))))
         (forward-line)
         (list :point (point) :column column)))))
