@@ -119,11 +119,7 @@
 (define-minor-mode helm-perldoc:perldoc-mode
   "helm-perldoc mode"
   :group   'helm-perldoc
-  :lighter "helm-perldoc"
-  (if helm-perldoc:perldoc-mode
-      (progn
-        (local-set-key (kbd "R") 'helm-perldoc:history))
-    (local-unset-key (kbd "R"))))
+  :lighter "helm-perldoc")
 
 (defsubst helm-perldoc:register-history (module)
   (add-to-list 'helm-perldoc:module-history module nil 'string=))
