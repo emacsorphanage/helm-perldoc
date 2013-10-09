@@ -50,7 +50,15 @@
   (setq helm-perldoc:run-setup-task-flag t)
   (deferred:$
     (deferred:process-buffer
-      "perl" "-MExtUtils::Installed" "-le" "print for ExtUtils::Installed->new->modules")
+      "perl" "-MExtUtils::Installed" "-MConfig" "-MFile::Spec"
+      "-le"
+      (mapconcat 'identity
+                 (list
+                  "print for ExtUtils::Installed->new->modules;"
+                  "opendir $dh, File::Spec->catfile($Config{privlibexp}, \"pod\");"
+                  "while (readdir $dh) { m/^(.+)\.pod$/ and print $1}"
+                  "closedir $dh;")
+                 " "))
     (deferred:nextc it
       (lambda (buf)
         (with-current-buffer buf
