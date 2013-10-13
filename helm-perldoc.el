@@ -274,9 +274,17 @@
     (type . perldoc)
     (candidate-number-limit . 9999)))
 
+(defun helm-perldoc:check-buffer ()
+  (let ((buf (get-buffer helm-perldoc:buffer)))
+   (when buf
+     (with-current-buffer buf
+       (unless (file-directory-p default-directory)
+         (kill-buffer))))))
+
 ;;;###autoload
 (defun helm-perldoc ()
   (interactive)
+  (helm-perldoc:check-buffer)
   (helm :sources '(helm-perldoc:imported-source
                    helm-perldoc:superclass-source
                    helm-perldoc:other-source)
