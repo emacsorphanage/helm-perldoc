@@ -90,7 +90,7 @@
 (defun helm-perldoc:exec (cmd &optional mode-func)
   (with-current-buffer (get-buffer-create helm-perldoc:buffer)
     (fundamental-mode) ;; clear old mode
-    (setq buffer-read-only nil)
+    (view-mode -1)
     (erase-buffer)
     (let ((ret (call-process-shell-command cmd nil t)))
       (unless (zerop ret)
@@ -98,7 +98,7 @@
       (goto-char (point-min))
       (when mode-func
         (funcall mode-func))
-      (helm-perldoc:perldoc-mode 1)
+      (view-mode +1)
       (pop-to-buffer (current-buffer)))))
 
 (defun helm-perldoc:show-header-line (module type)
@@ -121,19 +121,6 @@
   (interactive)
   (helm :sources '(helm-perldoc:history-source)
         :buffer (get-buffer-create "*helm-perldoc*")))
-
-(defvar helm-perldoc:mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "q") 'quit-window)
-    map))
-
-;;;###autoload
-(define-minor-mode helm-perldoc:perldoc-mode
-  "helm-perldoc mode"
-  :group   'helm-perldoc
-  :lighter "helm-perldoc"
-  (setq buffer-read-only t)
-  (use-local-map helm-perldoc:mode-map))
 
 (defsubst helm-perldoc:register-history (module)
   (add-to-list 'helm-perldoc:module-history module nil 'string=))
