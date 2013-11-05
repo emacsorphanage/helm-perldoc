@@ -159,13 +159,12 @@
   (helm-aif (or (helm-perldoc:search-import-statement)
                 (helm-perldoc:search-package-statement))
       it
-    (progn
-      (save-excursion
-        (goto-char (point-min))
-        (loop while (string-match "^#" (thing-at-point 'line))
-              do
-              (forward-line))
-        (list :point (point) :column 0)))))
+    (save-excursion
+      (goto-char (point-min))
+      (loop while (string-match "^#" (thing-at-point 'line))
+            do
+            (forward-line))
+      (list :point (point) :column 0))))
 
 (defun helm-perldoc:construct-import-statement (column modules)
   (let ((spaces (loop for i from 1 to column
@@ -231,14 +230,21 @@
             finally
             return (helm-perldoc:filter-modules supers)))))
 
+(defun helm-perldoc:transform-module-path (module)
+  (if (string-match-p "/" module)
+      (replace-regexp-in-string
+       "\\.p[ml]\\'" ""
+       (replace-regexp-in-string "/" "::" module))
+    module))
+
 (defun helm-perldoc:imported-init ()
   (with-helm-current-buffer
     (save-excursion
       (goto-char (point-min))
       (loop with bound = (helm-perldoc:search-endline)
-            with regexp = "^\\s-*\\(?:use\\|require\\)\\s-+\\([^ \t;]+\\)"
+            with regexp = "^\\s-*\\(?:use\\|require\\)\\s-+\\(['\"]\\)?\\([^'\" \t;]+\\)\\1?"
             while (re-search-forward regexp bound t)
-            collect (match-string-no-properties 1) into modules
+            collect (helm-perldoc:transform-module-path (match-string-no-properties 2)) into modules
             finally
             return (helm-perldoc:filter-modules modules)))))
 
