@@ -130,10 +130,18 @@
   (helm-perldoc:exec (format "perldoc %s" module))
   (helm-perldoc:show-header-line module :document))
 
+(defun helm-perldoc:module-file-path (module)
+  (let ((cmd (concat "perldoc -lm " module)))
+    (with-temp-buffer
+      (unless (zerop (call-process-shell-command cmd nil t))
+        (error "Failed: %s" cmd))
+      (goto-char (point-min))
+      (buffer-substring-no-properties (point) (line-end-position)))))
+
 (defun helm-perldoc:action-view-source (module)
   (helm-perldoc:register-history module)
-  (helm-perldoc:exec (format "perldoc -m %s" module) #'cperl-mode)
-  (helm-perldoc:show-header-line module :source))
+  (let ((module-file (helm-perldoc:module-file-path module)))
+    (find-file-read-only-other-window module-file)))
 
 (defun helm-perldoc:action-check-corelist (candidate)
   (unless (executable-find "corelist")
