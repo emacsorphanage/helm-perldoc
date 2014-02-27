@@ -55,7 +55,7 @@
       (mapconcat 'identity
                  (list
                   "print for ExtUtils::Installed->new->modules;"
-                  "opendir $dh, File::Spec->catfile($Config{privlibexp}, \"pod\");"
+                  "opendir $dh, File::Spec->catfile($Config{installprivlib}, $^O =~ /^(?:cygwin|darwin|VMS|MSWin32)$/ ? \"pods\" : \"pod\");"
                   "while (readdir $dh) { m/^(.+)\.pod$/ and print $1}"
                   "closedir $dh;")
                  " "))
