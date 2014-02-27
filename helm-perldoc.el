@@ -54,7 +54,7 @@
       "-le"
       (mapconcat 'identity
                  (list
-                  "print for ExtUtils::Installed->new->modules;"
+                  "print for ExtUtils::Installed->new(inc_override => [grep(!/^\.$/, @INC)])->modules;"
                   "opendir $dh, File::Spec->catfile($Config{privlibexp}, \"pod\");"
                   "while (readdir $dh) { m/^(.+)\.pod$/ and print $1}"
                   "closedir $dh;")
