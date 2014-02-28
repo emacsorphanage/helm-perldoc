@@ -1,11 +1,11 @@
 ;;; helm-perldoc.el --- perldoc with helm interface
 
-;; Copyright (C) 2013 by Syohei YOSHIDA
+;; Copyright (C) 2014 by Syohei YOSHIDA
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-helm-perldoc
 ;; Version: 0.01
-;; Package-Requires: ((helm "1.0") (deferred "0.3.1"))
+;; Package-Requires: ((helm "1.0") (deferred "0.3.1") (cl-lib "0.4"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 ;;; Code:
 
-(require 'cl)
+(require 'cl-lib)
 
 (require 'helm)
 (require 'deferred)
@@ -79,13 +79,13 @@
         (with-current-buffer buf
           (goto-char (point-min))
           (setq helm-perldoc:modules
-                (loop with modules = nil
-                      while (not (eobp))
-                      collect
-                      (prog1
-                          (buffer-substring-no-properties
-                           (line-beginning-position) (line-end-position))
-                        (forward-line 1))))
+                (cl-loop with modules = nil
+                         while (not (eobp))
+                         collect
+                         (prog1
+                             (buffer-substring-no-properties
+                              (line-beginning-position) (line-end-position))
+                           (forward-line 1))))
           (kill-buffer (current-buffer)))))))
 
 ;;;###autoload
@@ -183,16 +183,16 @@
       it
     (save-excursion
       (goto-char (point-min))
-      (loop while (string-match "^#" (thing-at-point 'line))
-            do
-            (forward-line))
+      (cl-loop while (string-match "^#" (thing-at-point 'line))
+               do
+               (forward-line))
       (list :point (point) :column 0))))
 
 (defun helm-perldoc:construct-import-statement (column modules)
-  (let ((spaces (loop for i from 1 to column
-                      collect " " into lst
-                      finally
-                      return (apply #'concat lst))))
+  (let ((spaces (cl-loop for i from 1 to column
+                         collect " " into lst
+                         finally
+                         return (apply #'concat lst))))
     (mapconcat (lambda (mod)
                  (format "%suse %s;\n" spaces mod)) modules "")))
 
@@ -219,13 +219,13 @@
     "Perldoc helm attribute"))
 
 (defun helm-perldoc:filter-modules (modules)
-  (loop for module in modules
-        when (and (not (string-match "^[[:digit:]]" module))
-                  (not (member module helm-perldoc:ignore-modules)))
-        collect module into filtered-modules
-        finally
-        return (remove-duplicates
-                (sort filtered-modules #'string<) :test #'equal)))
+  (cl-loop for module in modules
+           when (and (not (string-match "^[[:digit:]]" module))
+                     (not (member module helm-perldoc:ignore-modules)))
+           collect module into filtered-modules
+           finally
+           return (cl-remove-duplicates
+                   (sort filtered-modules #'string<) :test #'equal)))
 
 (defun helm-perldoc:search-endline ()
   (with-helm-current-buffer
@@ -237,20 +237,20 @@
   (with-temp-buffer
     (insert str)
     (goto-char (point-min))
-    (loop while (re-search-forward "\\<\\([a-zA-Z0-9_:]+\\)\\>" nil t)
-          collect (match-string-no-properties 1))))
+    (cl-loop while (re-search-forward "\\<\\([a-zA-Z0-9_:]+\\)\\>" nil t)
+             collect (match-string-no-properties 1))))
 
 (defun helm-perldoc:superclass-init ()
   (with-helm-current-buffer
     (save-excursion
       (goto-char (point-min))
-      (loop with bound = (helm-perldoc:search-endline)
-            with regexp = "^\\s-*use\\s-+\\(?:parent\\|base\\)\\s-+\\(?:qw\\)?\\(.+?\\)$"
-            while (re-search-forward regexp bound t)
-            appending (helm-perldoc:extracted-modules
-                       (match-string-no-properties 1)) into supers
-            finally
-            return (helm-perldoc:filter-modules supers)))))
+      (cl-loop with bound = (helm-perldoc:search-endline)
+               with regexp = "^\\s-*use\\s-+\\(?:parent\\|base\\)\\s-+\\(?:qw\\)?\\(.+?\\)$"
+               while (re-search-forward regexp bound t)
+               appending (helm-perldoc:extracted-modules
+                          (match-string-no-properties 1)) into supers
+               finally
+               return (helm-perldoc:filter-modules supers)))))
 
 (defun helm-perldoc:transform-module-path (module)
   (if (string-match-p "/" module)
@@ -263,19 +263,19 @@
   (with-helm-current-buffer
     (save-excursion
       (goto-char (point-min))
-      (loop with bound = (helm-perldoc:search-endline)
-            with regexp = "^\\s-*\\(?:use\\|require\\)\\s-+\\(['\"]\\)?\\([^'\" \t;]+\\)\\1?"
-            while (re-search-forward regexp bound t)
-            collect (helm-perldoc:transform-module-path (match-string-no-properties 2)) into modules
-            finally
-            return (helm-perldoc:filter-modules modules)))))
+      (cl-loop with bound = (helm-perldoc:search-endline)
+               with regexp = "^\\s-*\\(?:use\\|require\\)\\s-+\\(['\"]\\)?\\([^'\" \t;]+\\)\\1?"
+               while (re-search-forward regexp bound t)
+               collect (helm-perldoc:transform-module-path (match-string-no-properties 2)) into modules
+               finally
+               return (helm-perldoc:filter-modules modules)))))
 
 (defun helm-perldoc:other-init ()
   (unless helm-perldoc:modules
     (if helm-perldoc:run-setup-task-flag
         (error "Please wait. Setup asynchronous task does not complete yet")
       (error "Please exec 'M-x helm-perldoc:setup'")))
-  (sort (copy-list helm-perldoc:modules) 'string<))
+  (sort (cl-copy-list helm-perldoc:modules) 'string<))
 
 (defvar helm-perldoc:imported-source
   '((name . "Imported Modules")
@@ -312,11 +312,5 @@
         :buffer "*helm-perldoc*"))
 
 (provide 'helm-perldoc)
-
-;; Local Variables:
-;; byte-compile-warnings: (not cl-functions)
-;; coding: utf-8
-;; indent-tabs-mode: nil
-;; End:
 
 ;;; helm-perldoc.el ends here
