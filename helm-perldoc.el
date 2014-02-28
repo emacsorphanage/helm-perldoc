@@ -67,7 +67,7 @@
       "-le"
       (mapconcat 'identity
                  (list
-                  (format "@dirs=grep(!/^\.$/,split(/\\Q$Config{path_sep}\\E/,'%s'),@INC);"
+                  (format "@dirs=grep(!/^\.$/,split(/\\Q$Config{path_sep}\\E/,q<%s>),@INC);"
                           helm-perldoc:perl5lib)
                   "print for ExtUtils::Installed->new(inc_override=>[@dirs])->modules;"
                   "opendir $dh, File::Spec->catfile($Config{installprivlib}, $^O =~ /^(?:cygwin|darwin|VMS|MSWin32)$/ ? \"pods\" : \"pod\");"
