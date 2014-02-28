@@ -39,12 +39,25 @@
   :type 'list
   :group 'helm-perldoc)
 
+(defcustom helm-perldoc:perl5lib nil
+  "PERL5LIB environment variable"
+  :type '(choice (string :tag "Set this value as PERL5LIB")
+                 (boolean :tag "Not use PERL5LIB environment variable" nil))
+  :group 'helm-perldoc)
+
 (defvar helm-perldoc:modules nil
   "List of all installed modules")
 
 (defvar helm-perldoc:buffer "*perldoc*")
 (defvar helm-perldoc:run-setup-task-flag nil)
 (defvar helm-perldoc:module-history nil)
+
+(defmacro with-perl5lib (&rest body)
+  (declare (indent 0) (debug t))
+  `(let ((process-environment process-environment))
+     (when helm-perldoc:perl5lib
+       (push (concat "PERL5LIB=" helm-perldoc:perl5lib) process-environment))
+     ,@body))
 
 (defun helm-perldoc:collect-installed-modules ()
   (setq helm-perldoc:run-setup-task-flag t)
@@ -54,7 +67,9 @@
       "-le"
       (mapconcat 'identity
                  (list
-                  "print for ExtUtils::Installed->new->modules;"
+                  (format "@dirs=grep(!/^\.$/,split(/\\Q$Config{path_sep}\\E/,'%s'),@INC);"
+                          helm-perldoc:perl5lib)
+                  "print for ExtUtils::Installed->new(inc_override=>[@dirs])->modules;"
                   "opendir $dh, File::Spec->catfile($Config{installprivlib}, $^O =~ /^(?:cygwin|darwin|VMS|MSWin32)$/ ? \"pods\" : \"pod\");"
                   "while (readdir $dh) { m/^(.+)\.pod$/ and print $1}"
                   "closedir $dh;")
@@ -92,14 +107,13 @@
     (fundamental-mode) ;; clear old mode
     (view-mode -1)
     (erase-buffer)
-    (let ((ret (call-process-shell-command cmd nil t)))
-      (unless (zerop ret)
-        (error (format "Failed '%s'" cmd)))
-      (goto-char (point-min))
-      (when mode-func
-        (funcall mode-func))
-      (view-mode +1)
-      (pop-to-buffer (current-buffer)))))
+    (unless (zerop (with-perl5lib (call-process-shell-command cmd nil t)))
+      (error (format "Failed '%s'" cmd)))
+    (goto-char (point-min))
+    (when mode-func
+      (funcall mode-func))
+    (view-mode +1)
+    (pop-to-buffer (current-buffer))))
 
 (defun helm-perldoc:show-header-line (module type)
   (let ((header-msg (format "\"%s\" %s"
@@ -133,7 +147,7 @@
 (defun helm-perldoc:module-file-path (module)
   (let ((cmd (concat "perldoc -lm " module)))
     (with-temp-buffer
-      (unless (zerop (call-process-shell-command cmd nil t))
+      (unless (zerop (with-perl5lib (call-process-shell-command cmd nil t)))
         (error "Failed: %s" cmd))
       (goto-char (point-min))
       (buffer-substring-no-properties (point) (line-end-position)))))
