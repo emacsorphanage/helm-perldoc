@@ -309,7 +309,7 @@
   (helm :sources '(helm-perldoc:imported-source
                    helm-perldoc:superclass-source
                    helm-perldoc:other-source)
-        :buffer (get-buffer-create "*helm-perldoc*")))
+        :buffer "*helm-perldoc*"))
 
 (provide 'helm-perldoc)
 
