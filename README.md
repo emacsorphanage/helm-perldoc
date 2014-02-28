@@ -26,6 +26,13 @@ Search module and do action.
 
 Search modules which is already searched
 
+## Customize
+
+#### `helm-perldoc:perl5lib`
+
+`PERL5LIB` envirnoment variable which is set when `perl` and `perldoc`
+commands are executed.
+
 
 ## Actions
 
@@ -37,7 +44,7 @@ Search modules which is already searched
 
 ## Setup
 
-```elisp
+```lisp
 ;; helm-perldoc:setup takes long time on low power platform
 (add-hook 'cperl-mode-hook 'helm-perldoc:setup)
 ```
