@@ -16,6 +16,11 @@
 * [ExtUtils::Installed](https://metacpan.org/module/ExtUtils::Installed)
 
 
+## Installation
+
+You can install `helm-perldoc` from [MELPA](http://melpa.milkbox.net/) with package.el.
+
+
 ## Basic Usage
 
 #### `helm-perldoc`
