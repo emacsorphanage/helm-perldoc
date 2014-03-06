@@ -59,21 +59,16 @@
        (push (concat "PERL5LIB=" helm-perldoc:perl5lib) process-environment))
      ,@body))
 
+(defvar helm-perldoc:collect-modules-command
+  (concat (if load-file-name
+              (file-name-directory load-file-name)
+            default-directory) "helm-perldoc-collect-modules.pl"))
+
 (defun helm-perldoc:collect-installed-modules ()
   (setq helm-perldoc:run-setup-task-flag t)
   (deferred:$
     (deferred:process-buffer
-      "perl" "-MExtUtils::Installed" "-MConfig" "-MFile::Spec"
-      "-le"
-      (mapconcat 'identity
-                 (list
-                  (format "@dirs=grep(!/^\.$/,split(/\\Q$Config{path_sep}\\E/,q<%s>),@INC);"
-                          helm-perldoc:perl5lib)
-                  "print for ExtUtils::Installed->new(inc_override=>[@dirs])->modules;"
-                  "opendir $dh, File::Spec->catfile($Config{installprivlib}, $^O =~ /^(?:cygwin|darwin|VMS|MSWin32)$/ ? \"pods\" : \"pod\");"
-                  "while (readdir $dh) { m/^(.+)\.pod$/ and print $1}"
-                  "closedir $dh;")
-                 " "))
+      "perl" helm-perldoc:collect-modules-command)
     (deferred:nextc it
       (lambda (buf)
         (with-current-buffer buf
