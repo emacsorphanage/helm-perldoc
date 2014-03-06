@@ -52,6 +52,11 @@
 (defvar helm-perldoc:run-setup-task-flag nil)
 (defvar helm-perldoc:module-history nil)
 
+(defvar helm-perldoc:search-command
+  (concat (if load-file-name
+              (file-name-directory load-file-name)
+            default-directory) "helm-perldoc-collect-modules.pl"))
+
 (defmacro with-perl5lib (&rest body)
   (declare (indent 0) (debug t))
   `(let ((process-environment process-environment))
@@ -63,17 +68,7 @@
   (setq helm-perldoc:run-setup-task-flag t)
   (deferred:$
     (deferred:process-buffer
-      "perl" "-MExtUtils::Installed" "-MConfig" "-MFile::Spec"
-      "-le"
-      (mapconcat 'identity
-                 (list
-                  (format "@dirs=grep(!/^\.$/,split(/\\Q$Config{path_sep}\\E/,q<%s>),@INC);"
-                          helm-perldoc:perl5lib)
-                  "print for ExtUtils::Installed->new(inc_override=>[@dirs])->modules;"
-                  "opendir $dh, File::Spec->catfile($Config{installprivlib}, $^O =~ /^(?:cygwin|darwin|VMS|MSWin32)$/ ? \"pods\" : \"pod\");"
-                  "while (readdir $dh) { m/^(.+)\.pod$/ and print $1}"
-                  "closedir $dh;")
-                 " "))
+      "perl" helm-perldoc:search-command)
     (deferred:nextc it
       (lambda (buf)
         (with-current-buffer buf
@@ -290,7 +285,7 @@
     (candidate-number-limit . 9999)))
 
 (defvar helm-perldoc:other-source
-  '((name . "Other Modules")
+  '((name . "Installed Modules")
     (candidates . helm-perldoc:other-init)
     (type . perldoc)
     (candidate-number-limit . 9999)))
