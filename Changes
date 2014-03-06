@@ -1,0 +1,9 @@
+Revision history for helm-perldoc.el
+
+Revision 0.02 2014/03/07 syohex
+    - Improve collecting modules
+
+Revision 0.01 2014/02/28 syohex
+    - Initial Release
+    - Improvement for setting library path
+      Thanks sugyan !!

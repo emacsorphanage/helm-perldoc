@@ -13,7 +13,6 @@
 * helm 1.0 or higher
 * [deferred.el](https://github.com/kiwanami/emacs-deferred)
 * Perl
-* [ExtUtils::Installed](https://metacpan.org/module/ExtUtils::Installed)
 
 
 ## Installation
