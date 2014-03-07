@@ -4,9 +4,17 @@ use warnings;
 
 use File::Find;
 use File::Spec;
+use Config;
+
+my $helm_perl5lib = shift;
+my @dirs;
+if ($helm_perl5lib) {
+    @dirs = map { File::Spec->catfile($_, $Config{archname}), $_ } split ':', $helm_perl5lib;
+}
+push @dirs, @INC;
 
 my %modules = ();
-my %inc = map { $_ => $_ } map { File::Spec->canonpath($_) } grep { -d $_ && $_ ne '.' } @INC;
+my %inc = map { $_ => $_ } map { File::Spec->canonpath($_) } grep { -d $_ && $_ ne '.' } @dirs;
 
 for my $path (keys %inc) {
     find(+{

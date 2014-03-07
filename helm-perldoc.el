@@ -68,7 +68,7 @@
   (setq helm-perldoc:run-setup-task-flag t)
   (deferred:$
     (deferred:process-buffer
-      "perl" helm-perldoc:search-command)
+      "perl" helm-perldoc:search-command (or helm-perldoc:perl5lib ""))
     (deferred:nextc it
       (lambda (buf)
         (with-current-buffer buf
