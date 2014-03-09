@@ -1,5 +1,8 @@
 Revision history for helm-perldoc.el
 
+Revision 0.03 2014/03/09 syohex
+    - Pass helm-perldoc:perl5lib to collect module script
+
 Revision 0.02 2014/03/07 syohex
     - Improve collecting modules
 

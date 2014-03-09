@@ -4,7 +4,7 @@
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-helm-perldoc
-;; Version: 0.02
+;; Version: 0.03
 ;; Package-Requires: ((helm "1.0") (deferred "0.3.1") (cl-lib "0.4"))
 
 ;; This program is free software; you can redistribute it and/or modify
