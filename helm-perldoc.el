@@ -57,31 +57,66 @@
               (file-name-directory load-file-name)
             default-directory) "helm-perldoc-collect-modules.pl"))
 
+(defvar helm-perldoc:current-carton-path nil)
+
 (defmacro with-perl5lib (&rest body)
   (declare (indent 0) (debug t))
-  `(let ((process-environment process-environment))
-     (when helm-perldoc:perl5lib
-       (push (concat "PERL5LIB=" helm-perldoc:perl5lib) process-environment))
-     ,@body))
+  (let ((path (cl-gensym)))
+    `(let ((process-environment process-environment)
+           (,path (helm-perldoc:construct-perl5lib)))
+       (unless (string= ,path "")
+         (push (concat "PERL5LIB=" ,path) process-environment))
+       ,@body)))
+
+(defun helm-perldoc:construct-perl5lib ()
+  (if (not helm-perldoc:current-carton-path)
+      (or helm-perldoc:perl5lib "")
+    (if (not helm-perldoc:perl5lib)
+        helm-perldoc:current-carton-path
+      (concat helm-perldoc:current-carton-path
+              path-separator helm-perldoc:perl5lib))))
 
 (defun helm-perldoc:collect-installed-modules ()
   (setq helm-perldoc:run-setup-task-flag t)
-  (deferred:$
-    (deferred:process-buffer
-      "perl" helm-perldoc:search-command (or helm-perldoc:perl5lib ""))
-    (deferred:nextc it
-      (lambda (buf)
-        (with-current-buffer buf
-          (goto-char (point-min))
-          (setq helm-perldoc:modules
-                (cl-loop with modules = nil
-                         while (not (eobp))
-                         collect
-                         (prog1
-                             (buffer-substring-no-properties
-                              (line-beginning-position) (line-end-position))
-                           (forward-line 1))))
-          (kill-buffer (current-buffer)))))))
+  (let ((perl5lib (helm-perldoc:construct-perl5lib)))
+    (deferred:$
+      (deferred:process-buffer
+        "perl" helm-perldoc:search-command perl5lib)
+      (deferred:nextc it
+        (lambda (buf)
+          (with-current-buffer buf
+            (goto-char (point-min))
+            (setq helm-perldoc:modules
+                  (cl-loop while (not (eobp))
+                           collect
+                           (prog1
+                               (buffer-substring-no-properties
+                                (line-beginning-position) (line-end-position))
+                             (forward-line 1))))
+            (kill-buffer (current-buffer))))))))
+
+(defun helm-perldoc:query-carton-path (topdir)
+  (let ((default (concat topdir "local/lib/perl5/")))
+    (if (y-or-n-p (format "Carton Path: \"%s\" ?" default))
+        default
+      (read-directory-name "Carton Path: " topdir nil t))))
+
+;;;###autoload
+(defun helm-perldoc:carton-setup ()
+  (interactive)
+  (let ((topdir (locate-dominating-file default-directory "cpanfile")))
+    (unless topdir
+      (error "cpanfile not found"))
+    (let ((cpan-path (helm-perldoc:query-carton-path topdir)))
+      (setq helm-perldoc:current-carton-path
+            (directory-file-name (expand-file-name cpan-path)))
+      (helm-perldoc:collect-installed-modules))))
+
+;;;###autoload
+(defun helm-perldoc:clear-carton-path ()
+  (interactive)
+  (setq helm-perldoc:current-carton-path nil)
+  (helm-perldoc:collect-installed-modules))
 
 ;;;###autoload
 (defun helm-perldoc:setup ()
