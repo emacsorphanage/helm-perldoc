@@ -103,9 +103,8 @@
 
 (defun helm-perldoc:prepend-carton-path (new-path)
   (let ((lib-path (expand-file-name new-path)))
-   (setq helm-perldoc:carton-paths
-         (cons lib-path
-               (cl-delete lib-path helm-perldoc:carton-paths :test 'equal)))))
+    (cons lib-path
+          (cl-delete lib-path helm-perldoc:carton-paths :test 'equal))))
 
 ;;;###autoload
 (defun helm-perldoc:carton-setup ()
@@ -113,9 +112,12 @@
   (let ((topdir (locate-dominating-file default-directory "cpanfile")))
     (unless topdir
       (error "cpanfile not found"))
-    (let ((carton-path (helm-perldoc:query-carton-path topdir)))
-      (helm-perldoc:prepend-carton-path carton-path)
-      (helm-perldoc:collect-installed-modules))))
+    (let* ((carton-path (helm-perldoc:query-carton-path topdir))
+           (prev-paths (copy-list helm-perldoc:carton-paths))
+           (new-paths (helm-perldoc:prepend-carton-path carton-path)))
+      (unless (equal prev-paths new-paths)
+        (setq helm-perldoc:carton-paths new-paths)
+        (helm-perldoc:collect-installed-modules)))))
 
 ;;;###autoload
 (defun helm-perldoc:clear-carton-path ()
