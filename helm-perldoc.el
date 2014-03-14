@@ -57,7 +57,7 @@
               (file-name-directory load-file-name)
             default-directory) "helm-perldoc-collect-modules.pl"))
 
-(defvar helm-perldoc:current-carton-path nil)
+(defvar helm-perldoc:carton-paths nil)
 
 (defmacro with-perl5lib (&rest body)
   (declare (indent 0) (debug t))
@@ -69,12 +69,12 @@
        ,@body)))
 
 (defun helm-perldoc:construct-perl5lib ()
-  (if (not helm-perldoc:current-carton-path)
+  (if (null helm-perldoc:carton-paths)
       (or helm-perldoc:perl5lib "")
-    (if (not helm-perldoc:perl5lib)
-        helm-perldoc:current-carton-path
-      (concat helm-perldoc:current-carton-path
-              path-separator helm-perldoc:perl5lib))))
+    (let ((carton-paths-str (mapconcat 'identity helm-perldoc:carton-paths path-separator)))
+      (if (not helm-perldoc:perl5lib)
+          carton-paths-str
+        (concat carton-paths-str path-separator helm-perldoc:perl5lib)))))
 
 (defun helm-perldoc:collect-installed-modules ()
   (setq helm-perldoc:run-setup-task-flag t)
@@ -101,21 +101,26 @@
         default
       (read-directory-name "Carton Path: " topdir nil t))))
 
+(defun helm-perldoc:prepend-carton-path (new-path)
+  (let ((lib-path (expand-file-name new-path)))
+   (setq helm-perldoc:carton-paths
+         (cons lib-path
+               (cl-delete lib-path helm-perldoc:carton-paths :test 'equal)))))
+
 ;;;###autoload
 (defun helm-perldoc:carton-setup ()
   (interactive)
   (let ((topdir (locate-dominating-file default-directory "cpanfile")))
     (unless topdir
       (error "cpanfile not found"))
-    (let ((cpan-path (helm-perldoc:query-carton-path topdir)))
-      (setq helm-perldoc:current-carton-path
-            (directory-file-name (expand-file-name cpan-path)))
+    (let ((carton-path (helm-perldoc:query-carton-path topdir)))
+      (helm-perldoc:prepend-carton-path carton-path)
       (helm-perldoc:collect-installed-modules))))
 
 ;;;###autoload
 (defun helm-perldoc:clear-carton-path ()
   (interactive)
-  (setq helm-perldoc:current-carton-path nil)
+  (setq helm-perldoc:carton-paths nil)
   (helm-perldoc:collect-installed-modules))
 
 ;;;###autoload
