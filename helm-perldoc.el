@@ -121,7 +121,8 @@
     (if (not topdir)
         (message "'cpanfile' not found")
       (let ((carton-path (helm-perldoc:query-carton-path topdir interactive-p)))
-        (if (not (and carton-path (file-directory-p carton-path)))
+        (if (not (and carton-path
+                      (file-directory-p (file-name-as-directory carton-path))))
             (message "Carton is not setup yet!!")
           (let ((prev-paths (cl-copy-list helm-perldoc:carton-paths))
                 (new-paths (helm-perldoc:prepend-carton-path carton-path)))
