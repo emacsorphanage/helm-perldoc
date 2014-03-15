@@ -102,7 +102,7 @@
 
 (defun helm-perldoc:query-carton-path (topdir interactive-p)
   (let ((default-path (concat topdir helm-perldoc:default-carton-path)))
-    (if (and (not interactive-p) (file-directory-p default-path))
+    (if (not interactive-p)
         default-path
       (if (y-or-n-p (format "Carton Path: \"%s\" ?" default-path))
           default-path
@@ -118,14 +118,16 @@
   (interactive)
   (let ((topdir (locate-dominating-file default-directory "cpanfile"))
         (interactive-p (called-interactively-p 'interactive)))
-    (unless topdir
-      (error "cpanfile not found"))
-    (let* ((carton-path (helm-perldoc:query-carton-path topdir interactive-p))
-           (prev-paths (cl-copy-list helm-perldoc:carton-paths))
-           (new-paths (helm-perldoc:prepend-carton-path carton-path)))
-      (unless (equal prev-paths new-paths)
-        (setq helm-perldoc:carton-paths new-paths)
-        (helm-perldoc:collect-installed-modules)))))
+    (if (not topdir)
+        (message "'cpanfile' not found")
+      (let ((carton-path (helm-perldoc:query-carton-path topdir interactive-p)))
+        (if (not (and carton-path (file-directory-p carton-path)))
+            (message "Carton is not setup yet!!")
+          (let ((prev-paths (cl-copy-list helm-perldoc:carton-paths))
+                (new-paths (helm-perldoc:prepend-carton-path carton-path)))
+            (unless (equal prev-paths new-paths)
+              (setq helm-perldoc:carton-paths new-paths)
+              (helm-perldoc:collect-installed-modules))))))))
 
 ;;;###autoload
 (defun helm-perldoc:clear-carton-path ()
