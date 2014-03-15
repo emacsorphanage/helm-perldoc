@@ -45,6 +45,11 @@
                  (boolean :tag "Not use PERL5LIB environment variable" nil))
   :group 'helm-perldoc)
 
+(defcustom helm-perldoc:default-carton-path "local/lib/perl5"
+  "Default carton library path"
+  :type 'string
+  :group 'helm-perldoc)
+
 (defvar helm-perldoc:modules nil
   "List of all installed modules")
 
@@ -95,11 +100,13 @@
                              (forward-line 1))))
             (kill-buffer (current-buffer))))))))
 
-(defun helm-perldoc:query-carton-path (topdir)
-  (let ((default (concat topdir "local/lib/perl5/")))
-    (if (y-or-n-p (format "Carton Path: \"%s\" ?" default))
-        default
-      (read-directory-name "Carton Path: " topdir nil t))))
+(defun helm-perldoc:query-carton-path (topdir interactive-p)
+  (let ((default-path (concat topdir helm-perldoc:default-carton-path)))
+    (if (and (not interactive-p) (file-directory-p default-path))
+        default-path
+      (if (y-or-n-p (format "Carton Path: \"%s\" ?" default-path))
+          default-path
+        (read-directory-name "Carton Path: " topdir nil t)))))
 
 (defun helm-perldoc:prepend-carton-path (new-path)
   (let ((lib-path (expand-file-name new-path)))
@@ -109,11 +116,12 @@
 ;;;###autoload
 (defun helm-perldoc:carton-setup ()
   (interactive)
-  (let ((topdir (locate-dominating-file default-directory "cpanfile")))
+  (let ((topdir (locate-dominating-file default-directory "cpanfile"))
+        (interactive-p (called-interactively-p 'interactive)))
     (unless topdir
       (error "cpanfile not found"))
-    (let* ((carton-path (helm-perldoc:query-carton-path topdir))
-           (prev-paths (copy-list helm-perldoc:carton-paths))
+    (let* ((carton-path (helm-perldoc:query-carton-path topdir interactive-p))
+           (prev-paths (cl-copy-list helm-perldoc:carton-paths))
            (new-paths (helm-perldoc:prepend-carton-path carton-path)))
       (unless (equal prev-paths new-paths)
         (setq helm-perldoc:carton-paths new-paths)
