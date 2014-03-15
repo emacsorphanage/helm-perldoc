@@ -37,6 +37,10 @@ Search modules which is already searched
 `PERL5LIB` envirnoment variable which is set when `perl` and `perldoc`
 commands are executed.
 
+#### `helm-perldoc:default-carton-path`(Default `local/lib/perl5`
+
+Default carton library path.
+
 
 ## Actions
 
