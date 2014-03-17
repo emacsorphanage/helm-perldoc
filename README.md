@@ -63,7 +63,7 @@ Default carton library path.
 
 ```lisp
 ;; helm-perldoc:setup takes long time on low power platform
-(eval-after-load "cperl"
+(eval-after-load "cperl-mode"
   '(progn
     (helm-perldoc:setup)))
 ```
