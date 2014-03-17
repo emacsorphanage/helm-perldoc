@@ -1,4 +1,4 @@
-;;; helm-perldoc.el --- perldoc with helm interface
+;;; helm-perldoc.el --- perldoc with helm interface -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014 by Syohei YOSHIDA
 
@@ -252,7 +252,7 @@
     (goto-char p)
     (current-column)))
 
-(defun helm-perldoc:action-insert-modules (candidate)
+(defun helm-perldoc:action-insert-modules (_candidate)
   (let* ((insertion-plist (helm-perldoc:search-insertion-point))
          (statement (helm-perldoc:construct-import-statement
                      (plist-get insertion-plist :column)
