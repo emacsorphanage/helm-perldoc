@@ -82,23 +82,26 @@
         (concat carton-paths-str path-separator helm-perldoc:perl5lib)))))
 
 (defun helm-perldoc:collect-installed-modules ()
-  (setq helm-perldoc:run-setup-task-flag t)
-  (let ((perl5lib (helm-perldoc:construct-perl5lib)))
-    (deferred:$
-      (deferred:process-buffer
-        "perl" helm-perldoc:search-command perl5lib)
-      (deferred:nextc it
-        (lambda (buf)
-          (with-current-buffer buf
-            (goto-char (point-min))
-            (setq helm-perldoc:modules
-                  (cl-loop while (not (eobp))
-                           collect
-                           (prog1
-                               (buffer-substring-no-properties
-                                (line-beginning-position) (line-end-position))
-                             (forward-line 1))))
-            (kill-buffer (current-buffer))))))))
+  (if helm-perldoc:run-setup-task-flag
+      (message "Other collect process is already run" )
+    (setq helm-perldoc:run-setup-task-flag t)
+    (let ((perl5lib (helm-perldoc:construct-perl5lib)))
+      (deferred:$
+        (deferred:process-buffer
+          "perl" helm-perldoc:search-command perl5lib)
+        (deferred:nextc it
+          (lambda (buf)
+            (with-current-buffer buf
+              (goto-char (point-min))
+              (setq helm-perldoc:modules
+                    (cl-loop while (not (eobp))
+                             collect
+                             (prog1
+                                 (buffer-substring-no-properties
+                                  (line-beginning-position) (line-end-position))
+                               (forward-line 1))))
+              (setq helm-perldoc:run-setup-task-flag nil)
+              (kill-buffer (current-buffer)))))))))
 
 (defun helm-perldoc:query-carton-path (topdir interactive-p)
   (let ((default-path (concat topdir helm-perldoc:default-carton-path)))
