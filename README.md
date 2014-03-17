@@ -26,6 +26,15 @@ You can install `helm-perldoc` from [MELPA](http://melpa.milkbox.net/) with pack
 
 Search module and do action.
 
+#### `helm-perldoc:setup`
+
+Update module list for viewing documenations.
+
+#### `helm-perldoc:carton-setup`
+
+Update module list based [Carton](https://github.com/miyagawa/carton).
+Local library path is decided on `helm-perldoc:default-carton-path`.
+
 #### `helm-perldoc:history`
 
 Search modules which is already searched
@@ -37,7 +46,7 @@ Search modules which is already searched
 `PERL5LIB` envirnoment variable which is set when `perl` and `perldoc`
 commands are executed.
 
-#### `helm-perldoc:default-carton-path`(Default `local/lib/perl5`
+#### `helm-perldoc:default-carton-path`(Default `local/lib/perl5`)
 
 Default carton library path.
 
@@ -54,5 +63,7 @@ Default carton library path.
 
 ```lisp
 ;; helm-perldoc:setup takes long time on low power platform
-(add-hook 'cperl-mode-hook 'helm-perldoc:setup)
+(eval-after-load "cperl"
+  '(progn
+    (helm-perldoc:setup)))
 ```
