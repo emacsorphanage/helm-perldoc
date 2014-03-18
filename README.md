@@ -66,4 +66,7 @@ Default carton library path.
 (eval-after-load "cperl-mode"
   '(progn
     (helm-perldoc:setup)))
+
+;; auto carton setup
+(add-hook 'cperl-mode-hook 'helm-perldoc:carton-setup)
 ```
