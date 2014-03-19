@@ -234,7 +234,7 @@
       it
     (save-excursion
       (goto-char (point-min))
-      (cl-loop while (string-match "^#" (thing-at-point 'line))
+      (cl-loop while (string-match-p "^#" (thing-at-point 'line))
                do
                (forward-line))
       (list :point (point) :column 0))))
@@ -271,12 +271,12 @@
 
 (defun helm-perldoc:filter-modules (modules)
   (cl-loop for module in modules
-           when (and (not (string-match "^[[:digit:]]" module))
+           when (and (not (string-match-p "\\`[[:digit:]]" module))
                      (not (member module helm-perldoc:ignore-modules)))
            collect module into filtered-modules
            finally
            return (cl-remove-duplicates
-                   (sort filtered-modules #'string<) :test #'equal)))
+                   (sort filtered-modules 'string<) :test 'equal)))
 
 (defun helm-perldoc:search-endline ()
   (with-helm-current-buffer
