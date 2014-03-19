@@ -214,17 +214,24 @@
   (message "%s" (shell-command-to-string
                  (format "corelist %s" candidate))))
 
+(defun helm-perldoc:package-position ()
+  (save-excursion
+    (if (not (re-search-backward "^\\s-*\\(?:package\\)\\s-+" nil t))
+        (point-min)
+      (point))))
+
 (defun helm-perldoc:search-import-statement ()
   (save-excursion
-    (when (re-search-backward "^\\s-*\\(use\\)\\s-+" nil t)
-      (let ((column (helm-perldoc:point-to-column (match-beginning 1))))
-        (forward-line)
-        (list :point (point) :column column)))))
+    (let ((bound (helm-perldoc:package-position)))
+      (when (re-search-backward "^\\s-*\\(use\\)\\s-+" bound t)
+        (let ((column (helm-perldoc:point-to-column (match-beginning 1))))
+          (forward-line)
+          (list :point (point) :column column))))))
 
 (defun helm-perldoc:search-package-statement ()
   (save-excursion
-    (when (re-search-backward "^package^\\s-+*" nil t)
-      (let ((column (helm-perldoc:point-to-column (match-beginning 0))))
+    (when (re-search-backward "^\\s-*\\(package\\)\\s-+*" nil t)
+      (let ((column (helm-perldoc:point-to-column (match-beginning 1))))
         (forward-line)
         (list :point (point) :column column)))))
 
