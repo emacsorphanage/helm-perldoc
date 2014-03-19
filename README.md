@@ -1,4 +1,4 @@
-# helm-perldoc.el
+# helm-perldoc.el [![Build Status](https://travis-ci.org/syohex/emacs-helm-perldoc.png)](https://travis-ci.org/syohex/emacs-helm-perldoc)
 
 ![helm-perldoc](image/helm-perldoc1.png)
 

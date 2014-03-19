@@ -1,5 +1,10 @@
 Revision history for helm-perldoc.el
 
+Revision 0.05 2014/03/19 syohex
+    - Fix importing modules
+    - Add unit test
+    - Enable travis-ci now
+
 Revision 0.04 2014/03/17 syohex
     - Support carton setup(Thanks for sugyan, shibayu36)
     - Enable lexical binding
