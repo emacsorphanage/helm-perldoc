@@ -234,7 +234,7 @@
       it
     (save-excursion
       (goto-char (point-min))
-      (cl-loop while (string-match "^#" (thing-at-point 'line))
+      (cl-loop while (string-match-p "^#" (thing-at-point 'line))
                do
                (forward-line))
       (list :point (point) :column 0))))
