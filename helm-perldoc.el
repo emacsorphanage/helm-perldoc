@@ -185,7 +185,7 @@
 (defun helm-perldoc:history ()
   (interactive)
   (helm :sources '(helm-perldoc:history-source)
-        :buffer (get-buffer-create "*helm-perldoc*")))
+        :buffer "*helm-perldoc:history*"))
 
 (defsubst helm-perldoc:register-history (module)
   (add-to-list 'helm-perldoc:module-history module nil 'string=))
