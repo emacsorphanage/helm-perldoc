@@ -245,10 +245,9 @@
       (list :point (point) :column 0))))
 
 (defun helm-perldoc:construct-import-statement (column modules)
-  (let ((spaces (cl-loop for i from 1 to column
-                         collect " " into lst
-                         finally
-                         return (apply #'concat lst))))
+  (let ((spaces (cl-loop repeat column
+                         collect " " into padding
+                         finally return (apply 'concat padding))))
     (mapconcat (lambda (mod)
                  (format "%suse %s;\n" spaces mod)) modules "")))
 
