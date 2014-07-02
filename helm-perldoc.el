@@ -153,12 +153,12 @@
   "Module name in header"
   :group 'helm-perldoc)
 
-(defun helm-perldoc:exec (cmd &optional mode-func)
+(defun helm-perldoc:exec (cmd args &optional mode-func)
   (with-current-buffer (get-buffer-create helm-perldoc:buffer)
     (fundamental-mode) ;; clear old mode
     (view-mode -1)
     (erase-buffer)
-    (unless (zerop (with-perl5lib (call-process-shell-command cmd nil t)))
+    (unless (zerop (with-perl5lib (apply 'call-process cmd nil t nil args)))
       (error (format "Failed '%s'" cmd)))
     (goto-char (point-min))
     (when mode-func
@@ -192,27 +192,25 @@
 
 (defun helm-perldoc:action-view-document (module)
   (helm-perldoc:register-history module)
-  (helm-perldoc:exec (format "perldoc %s" module))
+  (helm-perldoc:exec "perldoc" (list module))
   (helm-perldoc:show-header-line module :document))
 
 (defun helm-perldoc:module-file-path (module)
-  (let ((cmd (concat "perldoc -lm " module)))
-    (with-temp-buffer
-      (unless (zerop (with-perl5lib (call-process-shell-command cmd nil t)))
-        (error "Failed: %s" cmd))
-      (goto-char (point-min))
-      (buffer-substring-no-properties (point) (line-end-position)))))
+  (with-temp-buffer
+    (unless (zerop (with-perl5lib (call-process "perldoc" nil t nil "-lm" module)))
+      (error "Failed: 'perldoc -lm %s'" module))
+    (goto-char (point-min))
+    (buffer-substring-no-properties (point) (line-end-position))))
 
 (defun helm-perldoc:action-view-source (module)
   (helm-perldoc:register-history module)
   (let ((module-file (helm-perldoc:module-file-path module)))
     (find-file-read-only-other-window module-file)))
 
-(defun helm-perldoc:action-check-corelist (candidate)
+(defun helm-perldoc:action-check-corelist (module)
   (unless (executable-find "corelist")
     (error "Please install 'Module::CoreList'"))
-  (message "%s" (shell-command-to-string
-                 (format "corelist %s" candidate))))
+  (message "%s" (shell-command-to-string (concat "corelist " module))))
 
 (defun helm-perldoc:package-position ()
   (save-excursion
