@@ -56,6 +56,11 @@
     (let ((got (helm-perldoc:construct-perl5lib)))
       (should (string= "/lib1/perl5:/lib2/perl5:/lib3/perl5" got)))))
 
+(ert-deftest construct-import-statement ()
+  "construct module import statements"
+  (let ((got (helm-perldoc:construct-import-statement 4 '("strict" "Amon2"))))
+    (should (string= "    use strict;\n    use Amon2;\n" got))))
+
 (provide 'test-helm-perldoc)
 
 ;;; test-helm-perldoc.el ends here
