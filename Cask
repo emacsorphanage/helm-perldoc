@@ -1,7 +1,7 @@
 (source gnu)
 (source melpa)
 
-(package "helm-perldoc" "0" "perldoc with helm interface")
+(package "helm-perldoc" "0.07" "perldoc with helm interface")
 
 (depends-on "cl-lib")
 (depends-on "helm")

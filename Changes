@@ -1,5 +1,8 @@
 Revision history for helm-perldoc.el
 
+Revision 0.07 2014/07/02 syohex
+    - Refactoring
+
 Revision 0.06 2014/03/19 syohex
     - Fix specifying buffer issue
       Thanks sugyan
