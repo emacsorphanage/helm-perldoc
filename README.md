@@ -1,4 +1,4 @@
-# helm-perldoc.el [![Build Status](https://travis-ci.org/syohex/emacs-helm-perldoc.png)](https://travis-ci.org/syohex/emacs-helm-perldoc)
+# helm-perldoc.el [![travis badge][travis-badge]][travis-link] [![melpa badge][melpa-badge]][melpa-link] [![melpa stable badge][melpa-stable-badge]][melpa-stable-link]
 
 ![helm-perldoc](image/helm-perldoc1.png)
 
@@ -70,3 +70,10 @@ Default carton library path.
 ;; auto carton setup
 (add-hook 'cperl-mode-hook 'helm-perldoc:carton-setup)
 ```
+
+[travis-badge]: https://travis-ci.org/syohex/emacs-helm-perldoc.svg
+[travis-link]: https://travis-ci.org/syohex/emacs-helm-perldoc
+[melpa-link]: http://melpa.org/#/helm-perldoc
+[melpa-stable-link]: http://melpa.org/#/helm-perldoc
+[melpa-badge]: http://melpa.org/packages/helm-perldoc-badge.svg
+[melpa-stable-badge]: http://stable.melpa.org/packages/helm-perldoc-badge.svg
