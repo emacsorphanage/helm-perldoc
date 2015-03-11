@@ -74,6 +74,6 @@ Default carton library path.
 [travis-badge]: https://travis-ci.org/syohex/emacs-helm-perldoc.svg
 [travis-link]: https://travis-ci.org/syohex/emacs-helm-perldoc
 [melpa-link]: http://melpa.org/#/helm-perldoc
-[melpa-stable-link]: http://melpa.org/#/helm-perldoc
+[melpa-stable-link]: http://stable.melpa.org/#/helm-perldoc
 [melpa-badge]: http://melpa.org/packages/helm-perldoc-badge.svg
 [melpa-stable-badge]: http://stable.melpa.org/packages/helm-perldoc-badge.svg
