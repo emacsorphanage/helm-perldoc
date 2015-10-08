@@ -10,7 +10,7 @@
 ## Requirements
 
 * Emacs 24 or higher
-* helm 1.0 or higher
+* helm 1.7.7 or higher
 * [deferred.el](https://github.com/kiwanami/emacs-deferred)
 * Perl
 
@@ -73,7 +73,7 @@ Default carton library path.
 
 [travis-badge]: https://travis-ci.org/syohex/emacs-helm-perldoc.svg
 [travis-link]: https://travis-ci.org/syohex/emacs-helm-perldoc
-[melpa-link]: http://melpa.org/#/helm-perldoc
-[melpa-stable-link]: http://stable.melpa.org/#/helm-perldoc
-[melpa-badge]: http://melpa.org/packages/helm-perldoc-badge.svg
-[melpa-stable-badge]: http://stable.melpa.org/packages/helm-perldoc-badge.svg
+[melpa-link]: https://melpa.org/#/helm-perldoc
+[melpa-stable-link]: https://stable.melpa.org/#/helm-perldoc
+[melpa-badge]: https://melpa.org/packages/helm-perldoc-badge.svg
+[melpa-stable-badge]: https://stable.melpa.org/packages/helm-perldoc-badge.svg
