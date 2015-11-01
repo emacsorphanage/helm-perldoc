@@ -17,7 +17,11 @@
 
 ## Installation
 
-You can install `helm-perldoc` from [MELPA](http://melpa.milkbox.net/) with package.el.
+`helm-perldoc` is available on [MELPA](https://melpa.org/) and [MELPA stable](https://stable.melpa.org/)
+
+You can install `helm-perldoc` with the following command.
+
+<kbd>M-x package-install [RET] helm-perldoc [RET]</kbd>
 
 
 ## Basic Usage
