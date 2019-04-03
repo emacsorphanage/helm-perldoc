@@ -359,13 +359,18 @@
          (kill-buffer))))))
 
 ;;;###autoload
-(defun helm-perldoc ()
+(defun helm-perldoc (&optional input)
   (interactive)
   (helm-perldoc:check-buffer)
   (helm :sources '(helm-perldoc:imported-source
                    helm-perldoc:superclass-source
                    helm-perldoc:other-source)
+        :input input
         :buffer "*helm-perldoc*"))
+
+(defun helm-perldoc-at-point ()
+  (interactive)
+  (helm-perldoc (thing-at-point 'symbol)))
 
 (provide 'helm-perldoc)
 
