@@ -368,6 +368,7 @@
         :input input
         :buffer "*helm-perldoc*"))
 
+;;;###autoload
 (defun helm-perldoc-at-point ()
   (interactive)
   (helm-perldoc (thing-at-point 'symbol)))
